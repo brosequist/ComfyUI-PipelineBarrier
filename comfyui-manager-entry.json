@@ -1,0 +1,11 @@
+{
+  "author": "brosequist",
+  "title": "ComfyUI Pipeline Memory Barrier",
+  "id": "comfyui-pipeline-barrier",
+  "reference": "https://github.com/brosequist/ComfyUI-PipelineBarrier",
+  "files": [
+    "https://github.com/brosequist/ComfyUI-PipelineBarrier"
+  ],
+  "install_type": "git-clone",
+  "description": "Inserts an explicit GPU cache flush (soft_empty_cache + gc.collect + torch.cuda.empty_cache) between pipeline stages. Prevents OOM kills in multi-stage workflows such as WanVideo two-pass I2V. Works on any wire type — LATENT, MODEL, IMAGE, etc. Logs GPU and RAM usage before and after flush."
+}

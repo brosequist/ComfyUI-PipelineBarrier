@@ -1,0 +1,11 @@
+[project]
+name = "comfyui-pipeline-barrier"
+version = "1.0.0"
+description = "ComfyUI node that force-flushes GPU caches between pipeline stages to prevent OOM kills"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "brosequist" }]
+requires-python = ">=3.9"
+
+[project.urls]
+Repository = "https://github.com/brosequist/ComfyUI-PipelineBarrier"
