@@ -15,25 +15,10 @@ import torch
 import comfy.model_management as mm
 
 
-class _AnyType(str):
-    """Sentinel that compares equal to every ComfyUI type string.
-
-    Allows PipelineMemoryBarrier to sit on any wire in the graph without
-    requiring a specific type declaration.
-    """
-
-    def __ne__(self, other: object) -> bool:
-        return False
-
-
-_ANY = _AnyType("*")
-
-
 def _log_memory(label: str) -> None:
-    n = torch.cuda.device_count()
-    for i in range(n):
+    for i in range(torch.cuda.device_count()):
         alloc = torch.cuda.memory_allocated(i) / 1024**3
-        rsvd = torch.cuda.memory_reserved(i) / 1024**3
+        rsvd  = torch.cuda.memory_reserved(i)  / 1024**3
         print(
             f"[PipelineBarrier] {label} | GPU {i}: "
             f"alloc={alloc:.2f} GiB  reserved={rsvd:.2f} GiB"
@@ -55,58 +40,38 @@ def _flush() -> None:
 
 
 class PipelineMemoryBarrier:
-    """Force-flush GPU caches and run GC between pipeline stages.
+    """Force-flush GPU caches between pipeline stages.
 
-    Place this node between pipeline stages to ensure GPU and CPU memory is
-    fully released before the next stage loads its models.  The input value
-    passes through unchanged, so the node is non-destructive and can be
-    inserted on any wire.
-
-    Inputs
-    ------
-    passthrough : any
-        Any value — LATENT, MODEL, IMAGE, CONDITIONING, etc.  Returned
-        unchanged as the only output.
-    log_memory : bool
-        When True (default), prints GPU allocated/reserved and system RAM
-        usage before and after the flush to the ComfyUI console.
-
-    Outputs
-    -------
-    passthrough : same type as input
-        The unmodified input value.
+    Pass a LATENT through this node to trigger an explicit GPU cache flush
+    before the next stage loads its models.  Zero compute cost; useful between
+    samplers and before VAE decode in multi-stage workflows.
     """
 
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "passthrough": (_ANY,),
+                "latent": ("LATENT",),
             },
             "optional": {
                 "log_memory": ("BOOLEAN", {"default": True}),
             },
         }
 
-    RETURN_TYPES = (_ANY,)
-    RETURN_NAMES = ("passthrough",)
-    FUNCTION = "barrier"
-    CATEGORY = "utils/memory"
-    OUTPUT_NODE = False
+    RETURN_TYPES  = ("LATENT",)
+    RETURN_NAMES  = ("latent",)
+    FUNCTION      = "barrier"
+    CATEGORY      = "utils/memory"
+    OUTPUT_NODE   = False
 
-    def barrier(self, passthrough, log_memory: bool = True):
+    def barrier(self, latent, log_memory: bool = True):
         if log_memory:
             _log_memory("before flush")
         _flush()
         if log_memory:
             _log_memory("after  flush")
-        return (passthrough,)
+        return (latent,)
 
 
-NODE_CLASS_MAPPINGS = {
-    "PipelineMemoryBarrier": PipelineMemoryBarrier,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "PipelineMemoryBarrier": "Pipeline Memory Barrier",
-}
+NODE_CLASS_MAPPINGS         = {"PipelineMemoryBarrier": PipelineMemoryBarrier}
+NODE_DISPLAY_NAME_MAPPINGS  = {"PipelineMemoryBarrier": "Pipeline Memory Barrier"}
