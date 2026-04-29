@@ -25,7 +25,7 @@ No pip dependencies beyond what ComfyUI already installs (`psutil` is included i
 
 ## Usage
 
-The node accepts any input type and returns it unchanged, so it can be inserted on any wire.
+The node accepts a LATENT input and returns it unchanged.
 
 **Typical placement in a WanVideo two-pass workflow:**
 
@@ -38,7 +38,7 @@ The node accepts any input type and returns it unchanged, so it can be inserted 
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `passthrough` | any | — | Any value. Returned unchanged. |
+| `latent` | LATENT | — | Latent tensor. Returned unchanged. |
 | `log_memory` | bool | `True` | When enabled, logs GPU allocated/reserved and system RAM before and after the flush to the ComfyUI console. |
 
 ### Example console output
